@@ -76,7 +76,7 @@ productNameCheck = [
 
 intents.matches('greeting', [
     function (session) {
-        session.send("Hi! How can I help you?");
+        session.send("Ahoy there! How can I help you?");
     }
 ]);
 
@@ -179,4 +179,34 @@ intents.matches(/.*sell\s(.*)/i, [
 ]);
 
 
-intents.onDefault(builder.DialogAction.send("I'm sorry I didn't understand."));
+
+dialog('q_tutorial', [
+    function (session) {
+        session.send("I can help you figure out the right time to sell, the right price, and what to write in the description. Just go ahead and ask :)");
+    }
+]);
+
+
+dialog('test', [
+    function (session) {
+        session.send("Yup, I'm operational. How can I help you?");
+    }
+]);
+
+
+dialog('off_q_who', [
+    function (session) {
+        session.send("I'm Flex, and my job is to help you sell your stuff. How can I help you today?");
+    }
+]);
+
+
+dialog('off_q_ai', [
+    function (session) {
+        session.send("I'm a bot, although I would love to be a human. How can I help you today?");
+    }
+]);
+
+
+
+intents.onDefault(builder.DialogAction.send("Say what?"));
