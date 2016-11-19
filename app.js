@@ -110,13 +110,17 @@ intents.matches('help_description', productNameCheck.concat([
 intents.matches('q_current_time_optimal', [
     // insert logic for checking if there's an entity and checking if we can fetch something from the database
     function (session) {
-        if ('no peak time data available') {
+        // if there's no peak time data
+        if (session.dialogData.product.non_peak_months.length == 0) {
             session.send("Sorry, I couldn't find enough sales data for this item. It's probably new or rare :)");
         }
+        // if 
         else if ('current month is not peak month or non peak month') {
-            if ('there is one peak month') {
+            // one peak month
+            if (session.dialogData.product.non_peak_months.length == 1) {
                 session.send("Now is not a bad time to sell, but %s would be even better.", session.dialogData.product.non_peak_months[0]);
             }
+            // two peak months
             else {
                 session.send("Now is not a bad time to sell, but %s and %s would be better.", session.dialogData.product.non_peak_months[0], session.dialogData.product.non_peak_months[1]);
             }
@@ -137,11 +141,14 @@ intents.matches('q_current_time_optimal', [
 intents.matches('q_optimal_time', [
     // insert logic for checking if there's an entity and checking if we can fetch something from the database
     function (session) {
-        if ('one non-peak month') {
-            session.send("%s would be the best month to sell this item.", session.dialogData.productName);
+        if (session.dialogData.product.non_peak_months.length == 0) {
+            session.send("Sorry, I couldn't find enough sales data for this item. It's probably new or rare :)");
+        } 
+        if (session.dialogData.product.non_peak_months.length == 1) {
+            session.send("%s would be the best month to sell this item.", session.dialogData.product.non_peak_months[0]);
         }
         else {
-            session.send("%s and %s would be the best months to sell this item.", session.dialogData.productName);
+            session.send("%s and %s would be the best months to sell this item.", session.dialogData.product.non_peak_months[0], session.dialogData.product.non_peak_months[1]);
         }
     }
 ]);
