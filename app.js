@@ -102,7 +102,7 @@ intents.matches('price_check', productNameCheck.concat([
 intents.matches('ask_help_description', productNameCheck.concat([
     function (session) {
         session.send("Here are the typical keywords others are using in their ads: %s",
-            session.dialogData.product.keywords);
+            session.dialogData.product['keywords']);
     }
 ]));
 
@@ -167,12 +167,13 @@ intents.matches(/.*sell\s(.*)/i, [
     function (session, results) {
         session.dialogData.productName = results.matched[1];
 
-        ebayDb.collection('product-info').findOne({name: session.dialogData.productName}, {}, function (err, doc) {
+        ebayDb.collection('product_info').findOne({name: session.dialogData.productName}, {}, function (err, doc) {
             if (!doc)
-                builder.Prompts.text(session, "Sorry, I don't know much about \"%s\". Would you like to try with another item?", doc);
+                session.send("Sorry, I don't know much about \"%s\". Would you like to try with another item?",
+                    session.dialogData.productName);
             else {
                 session.dialogData.product = doc;
-                session.send("Selling %s", JSON.stringify(product));
+                session.send("%s", session.dialogData.product.keywords.join(', '));
             }
         });
     }
