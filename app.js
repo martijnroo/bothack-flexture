@@ -102,7 +102,7 @@ intents.matches('price_check', productNameCheck.concat([
 intents.matches('ask_help_description', productNameCheck.concat([
     function (session) {
         session.send("Here are the typical keywords others are using in their ads: %s",
-            session.dialogData.product.keywords);
+            session.dialogData.product['keywords']);
     }
 ]));
 
@@ -173,7 +173,7 @@ intents.matches(/.*sell\s(.*)/i, [
                     session.dialogData.productName);
             else {
                 session.dialogData.product = doc;
-                session.send("Selling %s", JSON.stringify(session.dialogData.product['keywords']));
+                session.send("%s", session.dialogData.product.keywords.join(', '));
             }
         });
     }
