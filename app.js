@@ -1,6 +1,19 @@
 var builder = require('botbuilder');
 var restify = require('restify');
 
+var MongoClient = require('mongodb').MongoClient
+    , assert = require('assert');
+
+// Connection URL
+var url = 'mongodb://localhost:27017/ebay-k';
+var ebayDb;
+// Use connect method to connect to the server
+MongoClient.connect(url, function (err, db) {
+    assert.equal(null, err);
+    ebayDb = db;
+});
+
+
 //=========================================================
 // Bot Setup
 //=========================================================
@@ -25,6 +38,7 @@ server.post('/api/messages', connector.listen());
 // var dialog = new builder.IntentDialog({ recognizers: [recognizer] });
 // bot.dialog('/', dialog);
 
+
 //=========================================================
 // Bots Dialogs
 //=========================================================
@@ -32,87 +46,75 @@ server.post('/api/messages', connector.listen());
 var intents = new builder.IntentDialog();
 bot.dialog('/', intents);
 
-intents.matches('greeting', function (session) {
 
-});
+productNameCheck = [
+    function (session, args, next) {
+        // Resolve product name entity from LUIS
+        session.dialogData.productName = builder.EntityRecognizer.findEntity(args.entities, 'productName');
 
-intents.matches('sell', [
-
-]);
-
-// has user given product name?
-bot.dialog('/product', [
-    function (session) {
-
-    }
-    // do we have product in database?
-]);
-
-intents.onDefault(builder.DialogAction.send("I'm sorry I didn't understand/ je ne comprends pas."));
-
-
-// Jenni's dialogs
-// Note that "session.dialogData.productName" needs to be replaced with values from the database
-
-// Add something to deal with users sending a freetext message instead of picking from the options
-dialog('sell', [
-    // insert logic for checking if there's an entity and checking if we can fetch something from the database
-    session.send("Sure thing! How can I help you?");
-    
-    // Jenni's semi-successful semi-failure of an attempt to build in some logic for dealing with lack of entities and lack of database matches
-    /*function (session) {
-        if ('no item name extracted, there is already something fetched from database') {
-            builder.Prompts.choice(session, "Sure thing! Would you still like to talk about your %s or do you have something else you'd like to sell?", ["%s", "Something else"], session.dialogData.productName);
+        if (!session.dialogData.productName) {
+            // Prompt for product name if not resolved
+            builder.Prompts.text(session, "What's the product you would like to sell?");
+        } else {
+            next();
         }
-        else if ('no item name extracted, nothing fetched from database') {
-            builder.Prompts.text(session, "Sure thing! What would you like to sell?");
-        }
-        else if ('item name extracted, can be found in database') {
-            session.send("Sure thing! How can I help you?");
-            // exit this dialog
-        }
-        else {
-            session.send("Sorry, I don't have information about that item.");
-            // exit this dialog
-        }  
     },
     function (session, results) {
-        if (results.response && results.response.entity == dialogData.productName) {
-            session.send("How can I help you?");
-        } 
-        else if (results.response && results.response.entity == "Something else") {
-            builder.Prompts.text(session, "Sure thing! What would you like to sell?");
+        if (results.response) {
+            // If user was prompted, set productName with user response
+            session.dialogData.productName = results.response;
         }
-        else {
-            
-        }
-    }*/
-]);
+        // Do we have product in DB?
+        var product = ebayDb.collection('product-info').findOne({name: session.dialogData.productName});
+        if (!product)
+            builder.Prompts.text(session, "Sorry, I don't know much about \"%s\". Would you like to try with another item?");
+        else
+            session.dialogData.product = product;
+    }
+];
 
-dialog('price_check', [
-    // insert logic for checking if there's an entity and checking if we can fetch something from the database
+
+intents.matches('greeting', [
     function (session) {
-        session.send("The item is currently being sold in the range of %s-%s eur and the average price is %s.", session.dialogData.productName);
+        session.send("Hi! How can I help you?");
     }
 ]);
 
 
-dialog('ask_help_description', [
-    // insert logic for checking if there's an entity and checking if we can fetch something from the database
+// Note that "session.dialogData.productName" needs to be replaced with values from the database
+
+intents.matches('sell', productNameCheck.concat([
     function (session) {
-        session.send("Here are the typical keywords others are using in their ads: %s", session.dialogData.productName);
+        session.send("Sure thing! How can I help you?");
     }
-]);
+]));
 
 
-dialog('current_time_check', [
+intents.matches('price_check', productNameCheck.concat([
+    function (session) {
+        session.send("The item is currently being sold in the range of %s-%s eur and the average price is %s.",
+            session.dialogData.product['min_price'], session.dialogData.product['max_price'],
+            session.dialogData.product['avg_price']);
+    }
+]));
+
+
+intents.matches('ask_help_description', productNameCheck.concat([
+    function (session) {
+        session.send("Here are the typical keywords others are using in their ads: %s",
+            session.dialogData.product.keywords);
+    }
+]));
+
+
+intents.matches('current_time_check', [
     // insert logic for checking if there's an entity and checking if we can fetch something from the database
     function (session) {
         if ('no peak time data available') {
             session.send("Sorry, I couldn't find enough sales data for this item. It's probably new or rare :)");
         }
         else if ('current month is not peak month or non peak month') {
-            if ('there is one peak month'){
+            if ('there is one peak month') {
                 session.send("Now is not a bad time to sell, but %s would be even better.", session.dialogData.productName);
             }
             else {
@@ -132,7 +134,7 @@ dialog('current_time_check', [
 ]);
 
 
-dialog('q_optimal_time', [
+intents.matches('q_optimal_time', [
     // insert logic for checking if there's an entity and checking if we can fetch something from the database
     function (session) {
         if ('one non-peak month') {
@@ -146,8 +148,7 @@ dialog('q_optimal_time', [
 
 
 // Add something to deal with users sending a freetext message instead of picking from the options
-dialog('end', [
-    // insert logic for checking if there's an entity and checking if we can fetch something from the database
+intents.matches('end', [
     function (session) {
         builder.Prompts.choice(session, "Okay. Are you selling anything else?", ["Yes", "No"]);
     },
@@ -162,3 +163,20 @@ dialog('end', [
 ]);
 
 
+intents.matches(/.*sell\s(.*)/i, [
+    function (session, results) {
+        session.dialogData.productName = results.matched[1];
+
+        ebayDb.collection('product-info').findOne({name: session.dialogData.productName}, {}, function (err, doc) {
+            if (!doc)
+                builder.Prompts.text(session, "Sorry, I don't know much about \"%s\". Would you like to try with another item?", doc);
+            else {
+                session.dialogData.product = doc;
+                session.send("Selling %s", JSON.stringify(product));
+            }
+        });
+    }
+]);
+
+
+intents.onDefault(builder.DialogAction.send("I'm sorry I didn't understand."));

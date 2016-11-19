@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "botbuilder": "^3.4.4",
+    "mongodb": "^2.2.11",
     "restify": "^4.3.0"
   }
 }
