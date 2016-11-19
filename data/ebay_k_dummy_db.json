@@ -1,0 +1,102 @@
+[
+    {
+    "item_id" : "00001",
+    "name" : "piano",
+    "no_of_ads": "311",
+    "avg_price" : "621",
+    "min_price" : "150",
+    "max_price" : "2780",
+    "peak_months" : [
+        "November",
+        "May"
+    ],
+    "non_peak_months" : [
+        "January",
+        "July"
+    ],
+    "keywords": [
+        "klavier",
+        "casio"
+    ]
+    },
+    {
+    "item_id" : "00002",
+    "name" : "iphone 7",
+    "no_of_ads": "836",
+    "avg_price" : "701",
+    "min_price" : "580",
+    "max_price" : "799",
+    "peak_months" : [
+        "January",
+        "September"
+    ],
+    "non_peak_months" : [
+        "November",
+        "July"
+    ],
+    "keywords": [
+        "GB",
+        "garantie"
+    ]
+    },
+    {
+    "item_id" : "00003",
+    "name" : "ukulele",
+    "no_of_ads": "43",
+    "avg_price" : "78",
+    "min_price" : "19",
+    "max_price" : "220",
+    "peak_months" : [
+        "July"
+    ],
+    "non_peak_months" : [
+        "November",
+        "December"
+    ],
+    "keywords": [
+        "Farbe",
+        "Tasche"
+    ]
+    },
+    {
+    "item_id" : "00004",
+    "name" : "oculus rift",
+    "no_of_ads": "9",
+    "avg_price" : "343",
+    "min_price" : "250",
+    "max_price" : "650",
+    "peak_months" : [
+        "",
+        ""
+    ],
+    "non_peak_months" : [
+        "",
+        ""
+    ],
+    "keywords": [
+        "Virtual Reality",
+        "Brille"
+    ]
+    },
+    {
+    "item_id" : "00005",
+    "name" : "sofa",
+    "no_of_ads": "3861",
+    "avg_price" : "395",
+    "min_price" : "40",
+    "max_price" : "1800",
+    "peak_months" : [
+        "November",
+        "October"
+    ],
+    "non_peak_months" : [
+        "January",
+        "March"
+    ],
+    "keywords": [
+        "designer",
+        "Vintage",
+        "couch"
+    ]
+    }
+]
