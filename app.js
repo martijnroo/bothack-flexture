@@ -48,4 +48,4 @@ bot.dialog('/product', [
     // do we have product in database?
 ]);
 
-intents.onDefault(builder.DialogAction.send("I'm sorry I didn't understand."));
+intents.onDefault(builder.DialogAction.send("I'm sorry I didn't understand/ je ne comprends pas."));
