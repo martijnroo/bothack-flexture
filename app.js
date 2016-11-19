@@ -99,15 +99,15 @@ intents.matches('price_check', productNameCheck.concat([
 ]));
 
 
-intents.matches('ask_help_description', productNameCheck.concat([
+intents.matches('help_description', productNameCheck.concat([
     function (session) {
         session.send("Here are the typical keywords others are using in their ads: %s",
-            session.dialogData.product['keywords']);
+            session.dialogData.product.keywords.join(', ');
     }
 ]));
 
 
-intents.matches('current_time_check', [
+intents.matches('q_current_time_optimal', [
     // insert logic for checking if there's an entity and checking if we can fetch something from the database
     function (session) {
         if ('no peak time data available') {
@@ -115,17 +115,17 @@ intents.matches('current_time_check', [
         }
         else if ('current month is not peak month or non peak month') {
             if ('there is one peak month') {
-                session.send("Now is not a bad time to sell, but %s would be even better.", session.dialogData.productName);
+                session.send("Now is not a bad time to sell, but %s would be even better.", session.dialogData.product.non_peak_months[0]);
             }
             else {
-                session.send("Now is not a bad time to sell, but %s and %s would be better.", session.dialogData.productName);
+                session.send("Now is not a bad time to sell, but %s and %s would be better.", session.dialogData.product.non_peak_months[0], session.dialogData.product.non_peak_months[1]);
             }
         }
         else if ('current month is peak month') {
-            session.send("Hmm, it looks like a lot of people are selling it right now. There would be less competition in %s.", session.dialogData.productName);
+            session.send("Hmm, it looks like a lot of people are selling it right now. There would be less competition in %s.", session.dialogData.product.non_peak_months[0]);
         }
         else if ('current month is non peak month') {
-            session.send("Now would be a great time to sell, there's less competition than usually!", session.dialogData.productName);
+            session.send("Now would be a great time to sell, there's less competition than usually!");
         }
         else {
             session.send("Hmm, that didn't work. Could I help you with something else?");
