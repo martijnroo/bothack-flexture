@@ -193,9 +193,9 @@ intents.matches('help_description', productNameCheck.concat([
                 }
             }
             session.send("Can I help you with anything else?");
-            else {
-                session.send("Oops, something exploded! Can I help you with anything else?");
-            }
+            // else {
+            //     session.send("Oops, something exploded! Can I help you with anything else?");
+            // }
         })
         ;
     }
