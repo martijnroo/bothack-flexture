@@ -107,11 +107,19 @@ intents.matches('help_description', productNameCheck.concat([
     function (session) {
         session.send("Here are the typical keywords others are using in their ads: %s",
             session.dialogData.product.keywords.join(', '));
-    },
+    },    
     function (session) {
-        builder.Prompts.choice(session, "Would you like me to have a look at your description?", ["Yes", "No"]);
+        builder.Prompts.confirm(session, "Would you like me to have a look at your description?");
     },
     function (session, results) {
+        if (results.response) {
+            builder.Prompts.text(session, "Alright then, just write it to the text box and send it to me :)");
+        } else {
+            session.endDialog("Alright, no problem. What else can I help you with?",
+        }
+    },
+    function (session, results) {
+        // send results.response to Language analytics API
     }
 ]));
 
