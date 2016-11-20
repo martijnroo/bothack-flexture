@@ -135,13 +135,48 @@ intents.matches('help_description', productNameCheck.concat([
                 ]
             }
         };
+        // call the language detection API
         request.post(options, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 console.log(JSON.stringify(body));
-                session.send("We're %s percent confident that it's %s",
-                    body.documents[0].detectedLanguages[0].score * 100, body.documents[0].detectedLanguages[0].name)
+                // spellcheck if it's English
+                if (body.documents[0].detectedLanguages[0].name == "English") {
+                    // if there were corrections
+                    if ('there were corrections') {
+                        session.send("I caught some spelling errors, here's the corrected text:");
+                        // replace "correctedText"
+                        session.send('"%s"', correctedText);
+                        builder.Prompts.confirm(session, "Also, it would be a great idea to have that in German as well, so I translated it for you. Wanna see? :)");
+                    }
+                    // if there weren't corrections
+                    else {
+                        builder.Prompts.confirm(session, "Looks good! However, it would be a great idea to have that in German as well, so I translated it for you. Wanna see? :)");
+                    }
+                }
+                else if (body.documents[0].detectedLanguages[0].name == "German") {
+                    // tell them which keywords are missing
+                }
+                // languages other than English and German
+                else {
+                    builder.Prompts.confirm(session, "Instead of %s, I'd recommend posting it in German. Wanna see the translation?", body.documents[0].detectedLanguages[0].name);
+                }
+            }
+            else {
+                session.send("Oops, something exploded! Can I help you with anything else?");
             }
         });
+    },
+    // calling the translation API if the user wanted to
+    function (session, results) {
+        if (results.response) {
+            session.send("Here you go!");
+            // replace "translatedText"
+            session.send('"%s"', translatedText);
+        }
+        else {
+            session.send("Okay, no problem.");
+        }
+        builder.Prompts.confirm(session, "Would you like to hear some more tips for optimising your ad?");
     }
 ]));
 
