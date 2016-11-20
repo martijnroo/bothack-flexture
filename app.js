@@ -27,8 +27,8 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 
 // Create chat bot
 var connector = new builder.ChatConnector({
-    appId: process.env.BOTFRAMEWORK_APPID,
-    appPassword: process.env.BOTFRAMEWORK_APPSECRET
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSOFT_APP_PASSWORD
     // appId: '58ab14f6-06ae-4888-a97e-e72364fa3c19',
     // appPassword: 'i81Q69sggjiGoeZuiRGYRtF'
 });
@@ -46,6 +46,10 @@ var model = 'https://api.projectoxford.ai/luis/v2.0/apps/fddcc5a7-1631-470a-ab6c
 var recognizer = new builder.LuisRecognizer(model);
 var intents = new builder.IntentDialog({recognizers: [recognizer]});
 bot.dialog('/', intents);
+
+var azureDataMarketClientId = '8c5015be-4748-43b7-82a6-54aac1e74c99';
+var azureDataMarketClientSecret = 'e334657c4b9a49c8af11f47936efef43';
+var speechTranslateUrl = 'wss://dev.microsofttranslator.com/text/translate?api-version=1.0&from=en&to=de';
 
 
 //=========================================================
@@ -150,45 +154,85 @@ intents.matches('help_description', productNameCheck.concat([
         request.post(options, function (error, response, body) {
             if (!error && response.statusCode == 200) {
                 console.log(JSON.stringify(body));
-                // spellcheck if it's English
-                if (body.documents[0].detectedLanguages[0].name == "English") {
-                    // if there were corrections
-                    if ('there were corrections') {
-                        session.send("I caught some spelling errors, here's the corrected text:");
-                        // replace "correctedText"
-                        session.send('"%s"', correctedText);
-                    }
-                    // if there weren't corrections
-                    else {
-                        session.send("Looks good!");
-                    }
-                    builder.Prompts.confirm(session, "It would be a great idea to also have that in German, so I translated it for you. Wanna see? :)");
-                }
-                else if (body.documents[0].detectedLanguages[0].name == "German") {
+
+                var language = body.documents[0].detectedLanguages[0].name;
+                session.send("We're %s percent confident that it's %s",
+                    body.documents[0].detectedLanguages[0].score * 100, language);
+
+                if (language == "English") {
+                    var options = {
+                        url: 'https://api.cognitive.microsoft.com/bing/v5.0/spellcheck/?mode=proof&mkt=en-us',
+                        headers: {
+                            'Host': 'api.cognitive.microsoft.com',
+                            'Content-Type': 'application/x-www-form-urlencoded',
+                            'Ocp-Apim-Subscription-Key': '0bef649434b542cba1d3053f36910e91'
+                        },
+                        body: "Text=" + results.response
+                    };
+
+                    request.post(options, function (error, response, body) {
+                        if (!error && response.statusCode == 200) {
+                            console.log(JSON.stringify(body));
+                            // if there were corrections
+                            if (body.flaggedTokens) {
+                                session.send("I caught some spelling errors, here's the corrected text:");
+                                var correctedText = correctText(results.response, body.flaggedTokens);
+                                session.send('"%s"', correctedText);
+                            } else {
+                                // if there weren't corrections
+                                session.send("Looks good!");
+                            }
+                            builder.Prompts.confirm(session, "It would be a great idea to also have that in German, so I translated it for you. Wanna see? :)");
+                        }
+                    });
+                } else if (language == "German") {
                     // tell them which keywords are missing
-                }
-                // languages other than English and German
-                else {
-                    builder.Prompts.confirm(session, "Instead of %s, I'd recommend posting it in German. Wanna see the translation?", body.documents[0].detectedLanguages[0].name);
+                } else {
+                    // languages other than English and German
+                    builder.Prompts.confirm(session, "Instead of %s, I'd recommend posting it in German. Wanna see the translation?", language);
                 }
             }
             else {
                 session.send("Oops, something exploded! Can I help you with anything else?");
             }
-        });
-    },
-    // calling the translation API if the user wanted to
-    function (session, results) {
-        if (results.response) {
-            session.send("Here you go!");
-            // replace "translatedText"
-            session.send('"%s"', translatedText);
-        }
-        else {
-            session.send("Okay, no problem.");
-        }
-        builder.Prompts.confirm(session, "Would you like to hear some more tips for optimising your ad?");
+        })
+        ;
     }
+// // calling the translation API if the user wanted to
+//     function (session, results) {
+//         if (results.response) {
+//             session.send("Here you go!");
+//
+//             // get Azure Data Market Access Token
+//             // request.post(
+//             //     'https://datamarket.accesscontrol.windows.net/v2/OAuth2-13',
+//             //     {
+//             //         form : {
+//             //             grant_type : 'client_credentials',
+//             //             client_id : azureDataMarketClientId,
+//             //             client_secret : azureDataMarketClientSecret,
+//             //             scope : 'http://api.microsofttranslator.com'
+//             //         }
+//             //     },
+//             //
+//             //     // once we get the access token, we hook up the necessary websocket events for sending audio and processing the response
+//             //     function (error, response, body) {
+//             //         if (!error && response.statusCode == 200) {
+//             //
+//             //             // parse and get the acces token
+//             //             var accessToken = JSON.parse(body).access_token;
+//             //
+//             //
+//             //             session.send('"%s"', translatedText);
+//             //         }
+//             //     }
+//             // );
+//         }
+//         else {
+//             session.send("Okay, no problem.");
+//         }
+//         builder.Prompts.confirm(session, "Would you like to hear some more tips for optimising your ad?");
+//     }
 ]));
 
 
@@ -296,7 +340,18 @@ intents.matches('off_q_ai', [
     }
 ]);
 
+intents.matches('insult', [
+    function (session) {
+        session.send("Well, I like you.");
+    }
+]);
+
 
 intents.onDefault(function (session) {
     session.send(['Say what?', 'I didn’t quite get that.', 'Sorry, I didn’t understand that.', 'I don’t get it, please rephrase :)']);
 });
+
+
+function correctText(original, mistakes) {
+    return original;
+}
