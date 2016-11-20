@@ -27,10 +27,10 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 
 // Create chat bot
 var connector = new builder.ChatConnector({
-    appId: process.env.MICROSOFT_APP_ID,
-    appPassword: process.env.MICROSOFT_APP_PASSWORD
-    // appId: '58ab14f6-06ae-4888-a97e-e72364fa3c19',
-    // appPassword: 'i81Q69sggjiGoeZuiRGYRtF'
+    // appId: process.env.MICROSOFT_APP_ID,
+    // appPassword: process.env.MICROSOFT_APP_PASSWORD
+    appId: '58ab14f6-06ae-4888-a97e-e72364fa3c19',
+    appPassword: 'i81Q69sggjiGoeZuiRGYRtF'
 });
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
@@ -189,7 +189,7 @@ intents.matches('help_description', productNameCheck.concat([
                     session.send("Looks good! Just keep those keywords in mind and take a few good pictures of the item, and you're all set :)");
                 } else {
                     // languages other than English and German
-                    builder.Prompts.confirm(session, "Pro tip: instead of %s, it would be a great idea to translate it to German :)", language);
+                    session.send("Pro tip: instead of %s, it would be a great idea to translate it to German :)", language);
                 }
             }
             session.send("Can I help you with anything else?");
