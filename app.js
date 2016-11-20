@@ -105,6 +105,11 @@ intents.matches('help_description', productNameCheck.concat([
     function (session) {
         session.send("Here are the typical keywords others are using in their ads: %s",
             session.dialogData.product.keywords.join(', ');
+    },
+    function (session) {
+        builder.Prompts.choice(session, "Would you like me to have a look at your description?", ["Yes", "No"]);
+    }
+    function (session, results) {
     }
 ]));
 
