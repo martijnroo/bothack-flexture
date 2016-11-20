@@ -1,4 +1,4 @@
 # Flexture
 
-A Bothack Berlin hackathon team http://bothack.berlin
-
+A Bothack Berlin hackathon team 
+http://bothack.berlin

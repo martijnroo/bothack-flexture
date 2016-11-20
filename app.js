@@ -27,10 +27,8 @@ server.listen(process.env.port || process.env.PORT || 3978, function () {
 
 // Create chat bot
 var connector = new builder.ChatConnector({
-    // appId: process.env.MICROSOFT_APP_ID,
-    // appPassword: process.env.MICROSOFT_APP_PASSWORD
-    appId: '58ab14f6-06ae-4888-a97e-e72364fa3c19',
-    appPassword: 'i81Q69sggjiGoeZuiRGYRtF'
+    appId: process.env.MICROSOFT_APP_ID,
+    appPassword: process.env.MICROSOFT_APP_PASSWORD
 });
 var bot = new builder.UniversalBot(connector);
 server.post('/api/messages', connector.listen());
@@ -47,8 +45,8 @@ var recognizer = new builder.LuisRecognizer(model);
 var intents = new builder.IntentDialog({recognizers: [recognizer]});
 bot.dialog('/', intents);
 
-var azureDataMarketClientId = '8c5015be-4748-43b7-82a6-54aac1e74c99';
-var azureDataMarketClientSecret = 'e334657c4b9a49c8af11f47936efef43';
+var azureDataMarketClientId = process.env.AZURE_MARKET_ID;
+var azureDataMarketClientSecret = process.env.AZURE_MARKET_SECRET;
 var speechTranslateUrl = 'wss://dev.microsofttranslator.com/text/translate?api-version=1.0&from=en&to=de';
 
 
@@ -156,7 +154,7 @@ intents.matches('help_description', productNameCheck.concat([
                 console.log(JSON.stringify(body));
 
                 var language = body.documents[0].detectedLanguages[0].name;
-                
+
 
                 if (language == "English") {
                     session.send("Pro tip: In addition to %s, it would be a great idea to translate it to German as well :)", language);
@@ -169,7 +167,7 @@ intents.matches('help_description', productNameCheck.concat([
 //                         },
 //                         body: "Text=" + results.response
 //                     };
-// 
+//
 //                     request.post(options, function (error, response, body) {
 //                         if (!error && response.statusCode == 200) {
 //                             console.log(JSON.stringify(body));
