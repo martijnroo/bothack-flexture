@@ -8,11 +8,13 @@
     "max_price" : "2780",
     "peak_months" : [
         "November",
-        "May"
+        "May",
+        "April"
     ],
     "non_peak_months" : [
         "January",
-        "July"
+        "July",
+        "August"
     ],
     "keywords": [
         "klavier",
