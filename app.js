@@ -156,42 +156,43 @@ intents.matches('help_description', productNameCheck.concat([
                 console.log(JSON.stringify(body));
 
                 var language = body.documents[0].detectedLanguages[0].name;
-                session.send("We're %s percent confident that it's %s",
-                    body.documents[0].detectedLanguages[0].score * 100, language);
+                
 
                 if (language == "English") {
-                    var options = {
-                        url: 'https://api.cognitive.microsoft.com/bing/v5.0/spellcheck/?mode=proof&mkt=en-us',
-                        headers: {
-                            'Host': 'api.cognitive.microsoft.com',
-                            'Content-Type': 'application/x-www-form-urlencoded',
-                            'Ocp-Apim-Subscription-Key': '0bef649434b542cba1d3053f36910e91'
-                        },
-                        body: "Text=" + results.response
-                    };
-
-                    request.post(options, function (error, response, body) {
-                        if (!error && response.statusCode == 200) {
-                            console.log(JSON.stringify(body));
-                            // if there were corrections
-                            if (body.flaggedTokens) {
-                                session.send("I caught some spelling errors, here's the corrected text:");
-                                var correctedText = correctText(results.response, body.flaggedTokens);
-                                session.send('"%s"', correctedText);
-                            } else {
-                                // if there weren't corrections
-                                session.send("Looks good!");
-                            }
-                            builder.Prompts.confirm(session, "It would be a great idea to also have that in German, so I translated it for you. Wanna see? :)");
-                        }
-                    });
+                    session.send("Pro tip: In addition to %s, it would be a great idea to translate it to German as well :)", language);
+//                     var options = {
+//                         url: 'https://api.cognitive.microsoft.com/bing/v5.0/spellcheck/?mode=proof&mkt=en-us',
+//                         headers: {
+//                             'Host': 'api.cognitive.microsoft.com',
+//                             'Content-Type': 'application/x-www-form-urlencoded',
+//                             'Ocp-Apim-Subscription-Key': '0bef649434b542cba1d3053f36910e91'
+//                         },
+//                         body: "Text=" + results.response
+//                     };
+// 
+//                     request.post(options, function (error, response, body) {
+//                         if (!error && response.statusCode == 200) {
+//                             console.log(JSON.stringify(body));
+//                             // if there were corrections
+//                             if (body.flaggedTokens) {
+//                                 session.send("I caught some spelling errors, here's the corrected text:");
+//                                 var correctedText = correctText(results.response, body.flaggedTokens);
+//                                 session.send('"%s"', correctedText);
+//                             } else {
+//                                 // if there weren't corrections
+//                                 session.send("Looks good!");
+//                             }
+//                             builder.Prompts.confirm(session, "It would be a great idea to also have that in German, so I translated it for you. Wanna see? :)");
+//                         }
+//                     });
                 } else if (language == "German") {
-                    // tell them which keywords are missing
+                    session.send("Looks good! Just keep those keywords in mind and take a few good pictures of the item, and you're all set :)");
                 } else {
                     // languages other than English and German
-                    builder.Prompts.confirm(session, "Instead of %s, I'd recommend posting it in German. Wanna see the translation?", language);
+                    builder.Prompts.confirm(session, "Pro tip: instead of %s, it would be a great idea to translate it to German :)", language);
                 }
             }
+            session.send("Can I help you with anything else?");
             else {
                 session.send("Oops, something exploded! Can I help you with anything else?");
             }
@@ -342,7 +343,7 @@ intents.matches('off_q_ai', [
 
 intents.matches('insult', [
     function (session) {
-        session.send("Well, I like you.");
+        session.send("Aww :(");
     }
 ]);
 
