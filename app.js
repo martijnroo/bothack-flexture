@@ -290,6 +290,12 @@ intents.matches('off_q_ai', [
     }
 ]);
 
+intents.matches('insult', [
+    function (session) {
+        session.send("Well, I like you.");
+    }
+]);
+
 
 intents.onDefault(function (session) {
     session.send(['Say what?', 'I didn’t quite get that.', 'Sorry, I didn’t understand that.', 'I don’t get it, please rephrase :)']);
