@@ -146,12 +146,12 @@ intents.matches('help_description', productNameCheck.concat([
                         session.send("I caught some spelling errors, here's the corrected text:");
                         // replace "correctedText"
                         session.send('"%s"', correctedText);
-                        builder.Prompts.confirm(session, "Also, it would be a great idea to have that in German as well, so I translated it for you. Wanna see? :)");
                     }
                     // if there weren't corrections
                     else {
-                        builder.Prompts.confirm(session, "Looks good! However, it would be a great idea to have that in German as well, so I translated it for you. Wanna see? :)");
+                        session.send("Looks good!");
                     }
+                    builder.Prompts.confirm(session, "It would be a great idea to also have that in German, so I translated it for you. Wanna see? :)");
                 }
                 else if (body.documents[0].detectedLanguages[0].name == "German") {
                     // tell them which keywords are missing
