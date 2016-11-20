@@ -107,19 +107,41 @@ intents.matches('help_description', productNameCheck.concat([
     function (session) {
         session.send("Here are the typical keywords others are using in their ads: %s",
             session.dialogData.product.keywords.join(', '));
-    },    
-    function (session) {
         builder.Prompts.confirm(session, "Would you like me to have a look at your description?");
     },
     function (session, results) {
         if (results.response) {
             builder.Prompts.text(session, "Alright then, just write it to the text box and send it to me :)");
         } else {
-            session.endDialog("Alright, no problem. What else can I help you with?",
+            session.endDialog("Alright, no problem. What else can I help you with?");
         }
     },
     function (session, results) {
-        // send results.response to Language analytics API
+        var options = {
+            url: 'https://westus.api.cognitive.microsoft.com/text/analytics/v2.0/languages',
+            headers: {
+                'Host': 'westus.api.cognitive.microsoft.com',
+                'Content-Type': 'application/json',
+                'Ocp-Apim-Subscription-Key': 'ef87e866137b4f4083f825a609420920'
+            },
+            json: true,
+            body: {
+                "documents": [
+                    {
+                        "id": "string",
+                        "text": results.response,
+                        "numberOfLanguagesToDetect": 1
+                    }
+                ]
+            }
+        };
+        request.post(options, function (error, response, body) {
+            if (!error && response.statusCode == 200) {
+                console.log(JSON.stringify(body));
+                session.send("We're %s percent confident that it's %s",
+                    body.documents[0].detectedLanguages[0].score * 100, body.documents[0].detectedLanguages[0].name)
+            }
+        });
     }
 ]));
 
