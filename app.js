@@ -88,11 +88,13 @@ intents.matches('greeting', [
 
 intents.matches('sell', productNameCheck.concat([
     function (session) {
-        session.send("Sure thing! How can I help you?");
+        session.send("Alright, I'm happy to help! %s other people are also selling that right now.", session.dialogData.product.no_of_ads);
+        session.send("What would you like to know?");
     }
 ]));
 
 
+// for medium confidence rate: "Would you like to get a pricecheck for 'item'?"
 intents.matches('price_check',
     productNameCheck.concat([
         function (session) {
@@ -102,7 +104,8 @@ intents.matches('price_check',
         }
     ]));
 
-
+// Add something to deal with users sending a freetext message instead of picking from the options
+// for medium confidence rate: "Would you like me to help you with your item description?"
 intents.matches('help_description', productNameCheck.concat([
     function (session) {
         session.send("Here are the typical keywords others are using in their ads: %s",
@@ -181,6 +184,7 @@ intents.matches('help_description', productNameCheck.concat([
 ]));
 
 
+// For medium confidence rate: "Do you want to know if now is a good time to sell?"
 intents.matches('q_current_time_optimal', productNameCheck.concat([
     function (session) {
 
@@ -214,6 +218,7 @@ intents.matches('q_current_time_optimal', productNameCheck.concat([
 ]));
 
 
+// For medium confidence rate: "Do you want to know when would be a good time to sell?"
 intents.matches('q_optimal_time', productNameCheck.concat([
     // insert logic for checking if there's an entity and checking if we can fetch something from the database
     function (session) {
@@ -253,6 +258,12 @@ intents.matches('end', [
 intents.matches('q_tutorial', [
     function (session) {
         session.send("I can help you figure out the right time to sell, the right price, and what to write in the description. Just go ahead and ask :)");
+    }
+]);
+
+intents.matches('acknowledgement', [
+    function (session) {
+        session.send("Glad you like it :) Can I help you with anything else?");
     }
 ]);
 
